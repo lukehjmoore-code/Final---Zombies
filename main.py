@@ -3,12 +3,11 @@ from random import randint, choice
 import time
 
 screen = Screen()
-screen.bgcolor("black")
-screen.title("Zombie Survival Game")
+screen.bgcolor("light green")
+screen.title("ZOMBIES")
 screen.setup(width=600, height=600)
-screen.tracer(0)  # Turns off animation for smoother, faster updates
+screen.tracer(0)
 
-# --- Global Game Variables ---
 playing_area_size = 250
 p1_bullets = []
 p2_bullets = []
@@ -52,7 +51,6 @@ class Player(Turtle):
     def move(self):
         if not self.is_alive: return
         self.forward(self.speed_val)
-        # Boundary collision (reflect)
         if self.xcor() > 240 or self.xcor() < -240:
             self.setheading(180 - self.heading())
         if self.ycor() > 240 or self.ycor() < -240:
@@ -88,7 +86,6 @@ class Bullet(Turtle):
 
     def move(self):
         self.forward(15)
-        # Remove if out of bounds
         if not (-250 < self.xcor() < 250 and -250 < self.ycor() < 250):
             self.die()
 
@@ -96,18 +93,14 @@ class Bullet(Turtle):
         self.hideturtle()
         if self in self.owner.bullets:
             self.owner.bullets.remove(self)
-        # To avoid multiple deletions
         if self in screen.turtles():
             self.clear()
             self.hideturtle()
-            # This is a bit advanced, but ensures it's removed from screen
-            # in simple turtle, setting to 0,0 and hiding is fine.
 
 class Zombie(Turtle):
     def __init__(self, target_player):
         super().__init__()
-        self.shape("circle")
-        self.color("red")
+        self.color("green")
         self.pu()
         self.goto(randint(-200, 200), randint(-200, 200))
         self.target = target_player
@@ -135,26 +128,24 @@ class Bomb(Turtle):
         self.pu()
         self.goto(x, y)
         self.color("orange")
-        self.timer = 50 # Roughly 1 second in game loop
+        self.timer = 50
         self.exploded = False
 
     def explode(self):
-        # Draw explosion radius
         self.goto(self.xcor(), self.ycor())
         self.shape("circle")
-        self.shapesize(10, 10) # 100 pixel radius approx (10 * 10 = 100)
+        self.shapesize(10, 10)
         self.color("orange")
         self.showturtle()
         
-        # Kill zombies
         for z in zombies[:]:
             if self.distance(z) < 100:
                 z.hideturtle()
                 zombies.remove(z)
-                update_score(1) # Reward for bomb kill
+                update_score(1)
 
         screen.update()
-        time.sleep(0.2) # Visual delay for explosion
+        time.sleep(0.2)
         self.hideturtle()
         self.clear()
 
@@ -172,7 +163,6 @@ class Scoreboard(Turtle):
         self.write(f"P1 (Blue) Score: {p1_score}  |  P2 (Red) Score: {p2_score}", 
                    align="center", font=("Arial", 16, "normal"))
 
-# --- Helper Functions ---
 def spawn_zombies():
     global spawn_count
     for _ in range(spawn_count // 2):
@@ -182,8 +172,6 @@ def spawn_zombies():
 
 def update_score(amount):
     global p1_score, p2_score
-    # In this simple implementation, we don't know who shot it easily
-    # so we just add to both or create a way to track
     p1_score += amount
     score.update_score()
 
@@ -196,43 +184,35 @@ def game_over(winner):
     time.sleep(3)
     screen.bye()
 
-# --- Initialize Objects ---
 playing_area()
 p1 = Player(-100, 0, "blue", "a", "d", "w", "s", None)
 p2 = Player(100, 0, "red", "Left", "Right", "Up", "Down", None)
 prize = Prize()
 score = Scoreboard()
 
-# --- Controls ---
 screen.listen()
-# P1 Controls
 screen.onkeypress(p1.turnLeft, p1.left_key)
 screen.onkeypress(p1.turnRight, p1.right_key)
 screen.onkeypress(p1.fire, p1.fire_key)
 screen.onkeypress(p1.drop_bomb, p1.bomb_key)
-# P2 Controls
 screen.onkeypress(p2.turnLeft, p2.left_key)
 screen.onkeypress(p2.turnRight, p2.right_key)
 screen.onkeypress(p2.fire, p2.fire_key)
 screen.onkeypress(p2.drop_bomb, p2.bomb_key)
 
-# --- Main Game Loop ---
 game_is_on = True
 while game_is_on:
     screen.update()
-    time.sleep(0.02) # Control game speed
+    time.sleep(0.02) 
 
     p1.move()
     p2.move()
 
-    # Move bullets
     for b in p1.bullets + p2.bullets:
         b.move()
 
-    # Move Zombies
     for z in zombies:
         z.move()
-        # Check collision with players
         if z.distance(p1) < 20:
             p1.hideturtle(); p1.is_alive = False
             game_over("Player 2 (Red)")
