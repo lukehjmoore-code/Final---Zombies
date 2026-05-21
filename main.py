@@ -2,6 +2,7 @@ from turtle import *
 from random import randint, choice
 import time
 
+
 screen = Screen()
 screen.bgcolor("light green")
 screen.title("ZOMBIES")
@@ -22,7 +23,7 @@ def playing_area():
     t.hideturtle()
     t.speed(0)
     t.pu()
-    t.color("light blue")
+    t.color("light gray")
     t.goto(-250, 250)
     t.pd()
     t.pensize(3)
@@ -44,9 +45,10 @@ class Player(Turtle):
         self.fire_key = fire_key
         self.bomb_key = bomb_key
         self.bullets = []
-        self.bombs_left = 3
+        self.bombs_left = 1
         self.speed_val = 5
         self.is_alive = True
+
 
     def move(self):
         if not self.is_alive: return
@@ -71,7 +73,6 @@ class Player(Turtle):
         if self.is_alive and self.bombs_left > 0:
             bombs.append(Bomb(self.xcor(), self.ycor()))
             self.bombs_left -= 1
-            print(f"{self.color()[0]} dropped bomb. {self.bombs_left} left.")
 
 class Bullet(Turtle):
     def __init__(self, x, y, heading, owner):
@@ -97,10 +98,12 @@ class Bullet(Turtle):
             self.clear()
             self.hideturtle()
 
+
+
 class Zombie(Turtle):
     def __init__(self, target_player):
         super().__init__()
-        self.color("green")
+        self.color( "green")
         self.pu()
         self.goto(randint(-200, 200), randint(-200, 200))
         self.target = target_player
@@ -149,7 +152,7 @@ class Bomb(Turtle):
         self.hideturtle()
         self.clear()
 
-class Scoreboard(Turtle):
+class Score(Turtle):
     def __init__(self):
         super().__init__()
         self.color("white")
@@ -160,8 +163,8 @@ class Scoreboard(Turtle):
 
     def update_score(self):
         self.clear()
-        self.write(f"P1 (Blue) Score: {p1_score}  |  P2 (Red) Score: {p2_score}", 
-                   align="center", font=("Arial", 16, "normal"))
+        self.write(f"Red Score: {p1_score}  ,    Blue Score: {p2_score}", 
+                   align="center", font=("Arial", 16))
 
 def spawn_zombies():
     global spawn_count
@@ -179,7 +182,7 @@ def game_over(winner):
     msg = Turtle()
     msg.color("white")
     msg.hideturtle()
-    msg.write(f"GAME OVER! {winner} Wins!", align="center", font=("Arial", 30, "bold"))
+    msg.write(f"GG! {winner} wins!",    align="center", font=("Arial", 30))
     screen.update()
     time.sleep(3)
     screen.bye()
@@ -188,7 +191,8 @@ playing_area()
 p1 = Player(-100, 0, "blue", "a", "d", "w", "s", None)
 p2 = Player(100, 0, "red", "Left", "Right", "Up", "Down", None)
 prize = Prize()
-score = Scoreboard()
+score = Score()
+
 
 screen.listen()
 screen.onkeypress(p1.turnLeft, p1.left_key)
@@ -215,11 +219,11 @@ while game_is_on:
         z.move()
         if z.distance(p1) < 20:
             p1.hideturtle(); p1.is_alive = False
-            game_over("Player 2 (Red)")
+            game_over("Red")
             game_is_on = False
         if z.distance(p2) < 20:
             p2.hideturtle(); p2.is_alive = False
-            game_over("Player 1 (Blue)")
+            game_over("Blue")
             game_is_on = False
 
     if p1.distance(prize) < 20 or p2.distance(prize) < 20:
@@ -240,7 +244,7 @@ while game_is_on:
             bomb.explode()
             bomb.exploded = True
             bombs.remove(bomb)
-
     if not game_is_on: break
 
 screen.exitonclick()
+
